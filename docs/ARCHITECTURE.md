@@ -1,35 +1,35 @@
 # Architecture
 
 ## Overview
-OneBreath is a single-target SwiftUI iOS app following an **MVVM** pattern with the modern `@Observable` macro. Persistence is handled by **SwiftData**. There is no networking layer.
+OneBreath is a single-target React Native (Expo SDK 54) app written in TypeScript. It uses **expo-router** for file-based navigation and **react-native-reanimated** for all animations. There is no networking layer; persistence is local via `AsyncStorage`.
 
 ## Module Map
 ```
-App/                  Root composition: app entry, root view, theme injection
-Features/
-  Timer/              Breath-hold timer screen + view model + state machine
-  BreatheUp/          Guided pre-hold breathing intervals
-  History/            Past sessions list + detail
-  Stats/              Aggregations and Swift Charts
-Core/
-  Models/             SwiftData @Model types
-  Theme/              Color, gradient, animation, typography tokens
-  Components/         Reusable animated views (BreathingOrb, etc.)
-Resources/            Localizable strings, sounds (if any)
+app/                  expo-router routes (file-based navigation)
+  _layout.tsx         Root <Stack>
+  (tabs)/             Bottom tab group
+    _layout.tsx       <Tabs>
+    index.tsx         Hold timer screen
+    history.tsx       Past sessions
+    stats.tsx         Charts
+src/
+  components/         BreathingOrb, PulseRing, AnimatedCounter, ActionButton, etc.
+  theme/              Color, animation, layout tokens
+  timer/              State machine, elapsed-time hook, formatters
+  storage/            AsyncStorage repository + useSessions() hook
 ```
 
 ## Data Flow
 
 ```
-┌──────────────┐   actions    ┌──────────────────┐   commands   ┌──────────────┐
-│  SwiftUI View│ ───────────▶ │  @Observable VM  │ ───────────▶ │  SwiftData   │
-│              │ ◀─────────── │  (state machine) │ ◀─────────── │  ModelContext│
-└──────────────┘    state     └──────────────────┘    queries   └──────────────┘
+┌──────────────────┐  callbacks   ┌──────────────────┐  AsyncStorage  ┌─────────────┐
+│  React component │ ───────────▶ │  Custom hooks    │ ─────────────▶ │  Local JSON │
+│  (screen / view) │ ◀─────────── │  (useTimer*, …)  │ ◀───────────── │   (device)  │
+└──────────────────┘    state     └──────────────────┘     query      └─────────────┘
 ```
 
-- Views are stateless renderers bound to `@Bindable` view models.
-- View models own session state and a `Timer`/`Date` based clock.
-- The `ModelContext` is injected at the app root via `.modelContainer(...)`.
+- Screens are stateless; they read state from hooks (`useTimerMachine`, `useSessions`, `useElapsed`).
+- Animation state lives in Reanimated `useSharedValue`s inside each animated component — never in React state.
 
 ## Hold Session State Machine
 
@@ -43,37 +43,43 @@ Resources/            Localizable strings, sounds (if any)
                           discard     └──────────┘
 ```
 
-Events: `start`, `nextRound`, `beginHold`, `releaseHold`, `save`, `discard`, `reset`.
+Implemented in `src/timer/useTimerMachine.ts` as a discriminated union (`TimerPhase`).
 
 ### Timer accuracy
-- `holding` stores `startedAt: Date` and computes elapsed via `Date().timeIntervalSince(startedAt)` on every tick (60 Hz UI updates via `TimelineView(.animation)`).
-- This makes the timer **resilient to backgrounding**: if iOS suspends the app and resumes, the elapsed value is still correct.
-- `UIApplication.shared.isIdleTimerDisabled = true` while holding to prevent screen sleep.
+- `holding` stores `startedAt: number` (epoch ms).
+- `useElapsed(startedAt)` polls `Date.now()` every 50 ms and returns `(now - startedAt) / 1000`.
+- This is **resilient to backgrounding** — when the app is suspended and resumed, the elapsed value is recomputed from the current wall clock, not from accumulated ticks.
+- `expo-keep-awake` prevents screen sleep while holding.
 
-## Persistence: SwiftData
+## Persistence: AsyncStorage
 
-```swift
-@Model
-final class SessionRecord {
-    var id: UUID
-    var date: Date
-    var holdDuration: TimeInterval
-    var breatheUpRounds: Int
-    var notes: String?
-}
+Sessions are stored as a single JSON-encoded array under the key `onebreath:sessions:v1`.
+
+```ts
+type SessionRecord = {
+  id: string;
+  date: number;          // epoch ms
+  holdDuration: number;  // seconds
+  breatheUpRounds: number;
+};
 ```
 
-The `ModelContainer` is created in `OneBreathApp.swift` and injected via `.modelContainer(...)`. Queries use `@Query` in views or `FetchDescriptor` in view models.
+The `useSessions()` hook wraps load / save / delete and re-fetches on screen focus.
 
 ## Navigation
-- Root: `TabView` with three tabs — **Hold**, **History**, **Stats**.
-- Within tabs: `NavigationStack` for detail navigation.
+- Root `<Stack>` (no header) → `(tabs)` group with three bottom tabs: **Hold**, **History**, **Stats**.
+
+## Animations
+- All animations use Reanimated 3 shared values + `withTiming` / `withRepeat` / `withSequence`.
+- Background gradient cycles via a 12s shared-value loop.
+- Breathing orb scales 0.85 → 1.05 on a 4s/6s inhale-exhale cycle when idle; switches curves per `OrbState`.
+- Pulse ring expands 1× → 2.4× while fading from 0.7 → 0 alpha; loops while holding.
 
 ## Accessibility
-- All animated components honor `@Environment(\.accessibilityReduceMotion)`.
-- Timer announces milestone seconds via `.accessibilityValue` updates.
-- Dynamic Type supported throughout; no hard-coded font sizes outside the timer digits.
+- Buttons declare `accessibilityRole` and `accessibilityLabel`.
+- Animations respect Reduce Motion (planned: gate via `AccessibilityInfo.isReduceMotionEnabled`).
+- Counter uses `tabular-nums` to prevent layout jitter.
 
 ## Testing
-- `OneBreathTests` covers the session state machine and time formatting helpers.
-- UI is verified via SwiftUI Previews; no UI test target in v1.
+- TypeScript provides static safety (`tsc --noEmit`).
+- No runtime test runner in v1; consider Jest + React Native Testing Library when behavior grows.

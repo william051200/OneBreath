@@ -2,65 +2,76 @@
 
 > Hold your breath. Track your limit. Beat it.
 
-**OneBreath** is a beautifully simple iOS app for measuring how long you can hold a single breath. Whether you're a freediver training static apnea, a swimmer building lung capacity, a meditator exploring breathwork, or just curious about your limits — OneBreath gives you a calm, distraction-free way to time and track every hold.
-
----
+**OneBreath** is a beautifully simple breath-hold timer built with React Native (Expo). Whether you're a freediver training static apnea, a swimmer building lung capacity, a meditator exploring breathwork, or just curious about your limits — OneBreath gives you a calm, animated, distraction-free way to time and track every hold.
 
 ## ✨ Features
 
 - ⏱ **One-tap breath-hold timer** with background-safe accuracy
 - 🌬 **Guided breathe-up** intervals before each hold
 - 🏆 **Personal best** tracking and full session history
-- 📈 **Progress charts** powered by Swift Charts (PB, trend, average)
-- 🎨 **Calm zen UI** — soft shifting gradients, breathing orb, slow pulses
-- ♿ **Accessibility-first** — VoiceOver, Dynamic Type, Reduce Motion support
+- 📈 **Animated trend chart** of your progress
+- 🎨 **Calm zen UI** — soft shifting gradients, breathing orb, slow pulses (Reanimated)
+- 📱 **Cross-platform** — iOS, Android, and web from one codebase
 - 🔒 **Privacy-first** — no accounts, no analytics, no network calls
 
 ## 🛠 Tech Stack
 
-- **Swift 5.9+** / **SwiftUI** (iOS 17+)
-- **SwiftData** for local persistence
-- **Swift Charts** for stats
-- **XcodeGen** for project generation
+- **Expo** (SDK 54) + **React Native** + **TypeScript**
+- **expo-router** — file-based navigation
+- **react-native-reanimated** — 60fps native animations
+- **expo-linear-gradient** + **react-native-svg**
+- **react-native-gifted-charts** — animated stats chart
+- **AsyncStorage** — local session persistence
+- **expo-haptics** + **expo-keep-awake**
 
 ## 🚀 Getting Started
 
 ### Requirements
-- macOS 14+
-- Xcode 15+
-- iOS 17+ device or simulator
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
+- Node.js 20+ ([install via winget](https://nodejs.org): `winget install OpenJS.NodeJS.LTS`)
+- Expo Go app on your phone ([App Store](https://apps.apple.com/app/expo-go/id982107779) / [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent))
 
-### Setup
+### Run on your phone (Windows-friendly!)
 ```bash
 git clone https://github.com/william051200/OneBreath.git
 cd OneBreath
-xcodegen generate
-open OneBreath.xcodeproj
+npm install
+npm start
 ```
-Then press **⌘R** in Xcode to build and run.
+Then **scan the QR code** with the Expo Go app. Edit and save — the app reloads instantly.
+
+### Run on emulator
+```bash
+npm run android   # requires Android Studio + emulator
+npm run web       # quickest preview, runs in browser
+```
+
+### Building for the App Store / Play Store
+Use **EAS Build** (free for hobby projects, runs on Expo's cloud — no Mac required):
+```bash
+npm install -g eas-cli
+eas build --platform ios
+eas build --platform android
+```
 
 ## 📁 Project Structure
 ```
 OneBreath/
-├── OneBreath/
-│   ├── OneBreathApp.swift      # App entry
-│   ├── App/                    # Root view, navigation
-│   ├── Features/
-│   │   ├── Timer/              # Breath-hold timer
-│   │   ├── BreatheUp/          # Guided breathing
-│   │   ├── History/            # Past sessions
-│   │   └── Stats/              # Charts & analytics
-│   ├── Core/
-│   │   ├── Models/             # SwiftData models
-│   │   ├── Theme/              # Colors, gradients, animations
-│   │   └── Components/         # BreathingOrb, PulseRing, etc.
-│   ├── Resources/
-│   └── Assets.xcassets/
-├── OneBreathTests/
-├── docs/                       # Architecture, design, roadmap
-├── project.yml                 # XcodeGen config
-└── README.md
+├── app/                          # expo-router file-based routes
+│   ├── _layout.tsx               # Root stack
+│   └── (tabs)/
+│       ├── _layout.tsx           # Bottom tabs
+│       ├── index.tsx             # Hold timer screen
+│       ├── history.tsx           # Past sessions
+│       └── stats.tsx             # Charts
+├── src/
+│   ├── components/               # BreathingOrb, PulseRing, etc.
+│   ├── theme/                    # colors, animation tokens
+│   ├── timer/                    # state machine + formatting
+│   └── storage/                  # AsyncStorage session repo
+├── assets/                       # icons, splash
+├── app.json                      # Expo config
+├── babel.config.js               # Reanimated plugin
+└── package.json
 ```
 
 ## 📚 Documentation
