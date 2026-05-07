@@ -8,6 +8,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Layout } from '../theme/theme';
+import { useReduceMotion } from '../theme/useReduceMotion';
 
 type Style = 'primary' | 'secondary' | 'destructive';
 
@@ -21,15 +22,18 @@ type Props = {
 
 export function ActionButton({ title, onPress, icon, variant = 'primary', containerStyle }: Props) {
   const scale = useSharedValue(1);
+  const reduceMotion = useReduceMotion();
 
   const aStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
   const onIn = () => {
+    if (reduceMotion) return;
     scale.value = withSpring(0.97, { damping: 14, stiffness: 240 });
   };
   const onOut = () => {
+    if (reduceMotion) return;
     scale.value = withSpring(1, { damping: 12, stiffness: 200 });
   };
 

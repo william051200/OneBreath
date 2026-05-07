@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Layout, Anim } from '../theme/theme';
+import { useReduceMotion } from '../theme/useReduceMotion';
 
 export type OrbState = 'idle' | 'inhale' | 'exhale' | 'holding' | 'released';
 
@@ -22,10 +23,37 @@ type Props = {
 export function BreathingOrb({ state, size = Layout.orbSize }: Props) {
   const scale = useSharedValue(0.85);
   const glow = useSharedValue(0.5);
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
     cancelAnimation(scale);
     cancelAnimation(glow);
+
+    if (reduceMotion) {
+      switch (state) {
+        case 'idle':
+          scale.value = 1;
+          glow.value = 0.7;
+          break;
+        case 'inhale':
+          scale.value = 1.15;
+          glow.value = 0.9;
+          break;
+        case 'exhale':
+          scale.value = 0.75;
+          glow.value = 0.4;
+          break;
+        case 'holding':
+          scale.value = 1.08;
+          glow.value = 1.0;
+          break;
+        case 'released':
+          scale.value = 0.92;
+          glow.value = 0.5;
+          break;
+      }
+      return;
+    }
 
     switch (state) {
       case 'idle':
@@ -56,7 +84,7 @@ export function BreathingOrb({ state, size = Layout.orbSize }: Props) {
         glow.value = withTiming(0.5, { duration: 600 });
         break;
     }
-  }, [state, scale, glow]);
+  }, [state, scale, glow, reduceMotion]);
 
   const orbStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

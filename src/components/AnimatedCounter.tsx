@@ -1,7 +1,8 @@
 import React from 'react';
-import { Text, TextStyle } from 'react-native';
+import { Text, TextStyle, View } from 'react-native';
 import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
 import { Colors } from '../theme/theme';
+import { useReduceMotion } from '../theme/useReduceMotion';
 
 type Props = {
   text: string;
@@ -9,6 +10,16 @@ type Props = {
 };
 
 export function AnimatedCounter({ text, style }: Props) {
+  const reduceMotion = useReduceMotion();
+
+  if (reduceMotion) {
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={[defaultStyle, style]}>{text}</Text>
+      </View>
+    );
+  }
+
   return (
     <Animated.View
       layout={LinearTransition.springify().mass(0.4).damping(14)}

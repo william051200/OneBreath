@@ -9,6 +9,7 @@ import Animated, {
   cancelAnimation,
 } from 'react-native-reanimated';
 import { Layout, Anim, Colors } from '../theme/theme';
+import { useReduceMotion } from '../theme/useReduceMotion';
 
 type Props = {
   active: boolean;
@@ -18,10 +19,16 @@ type Props = {
 export function PulseRing({ active, baseSize = Layout.orbSize }: Props) {
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
     cancelAnimation(scale);
     cancelAnimation(opacity);
+    if (reduceMotion) {
+      scale.value = 1;
+      opacity.value = 0;
+      return;
+    }
     if (active) {
       scale.value = 1;
       opacity.value = 0.7;
@@ -38,7 +45,7 @@ export function PulseRing({ active, baseSize = Layout.orbSize }: Props) {
     } else {
       opacity.value = withTiming(0, { duration: 300 });
     }
-  }, [active, scale, opacity]);
+  }, [active, scale, opacity, reduceMotion]);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],

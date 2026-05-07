@@ -10,20 +10,27 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Anim } from '../theme/theme';
+import { useReduceMotion } from '../theme/useReduceMotion';
 
 const AnimatedLG = Animated.createAnimatedComponent(LinearGradient);
 
 export function GradientBackground() {
   const t = useSharedValue(0);
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
+    if (reduceMotion) {
+      cancelAnimation(t);
+      t.value = 1;
+      return;
+    }
     t.value = withRepeat(
       withTiming(1, { duration: Anim.bgShiftMs, easing: Easing.inOut(Easing.ease) }),
       -1,
       true
     );
     return () => cancelAnimation(t);
-  }, [t]);
+  }, [t, reduceMotion]);
 
   // Slight rotation/translation effect via animated start/end points
   const animatedProps = useAnimatedStyle(() => ({

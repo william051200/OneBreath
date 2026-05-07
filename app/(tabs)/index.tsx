@@ -161,7 +161,7 @@ function Actions({
       return <ActionButton title="Release" icon="stop" variant="destructive" onPress={onRelease} />;
     case 'finished':
       return (
-        <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1, flexDirection: 'row', gap: 12 }}>
           <ActionButton title="Discard" variant="secondary" onPress={onDiscard} />
           <ActionButton title="Save" icon="checkmark" onPress={() => onSave(phase.duration)} />
         </View>

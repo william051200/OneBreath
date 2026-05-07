@@ -7,7 +7,7 @@
 - [x] Session history with AsyncStorage
 - [x] Stats screen with animated chart
 - [x] Calm/zen UI with breathing orb (Reanimated)
-- [ ] Reduce Motion fallback
+- [x] Reduce Motion fallback
 - [ ] Real app icon + splash artwork
 
 ## v1.1 — Polish
