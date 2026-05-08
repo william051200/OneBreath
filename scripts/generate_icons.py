@@ -127,12 +127,7 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
 
 
 def make_og_image(symbol: Image.Image, path: Path) -> None:
-    """1200x630 social preview, optimized to read well even at small sizes.
-
-    Layout: large logo top-centre, huge bold title below, short tagline.
-    No URL on the image itself (Threads/X show the domain anyway).
-    A dark vignette behind the text guarantees contrast against the gradient.
-    """
+    """1200x630 social preview, optimized to read well even at small sizes."""
     width, height = 1200, 630
     bg = make_gradient_rect(width, height)
 
@@ -145,30 +140,37 @@ def make_og_image(symbol: Image.Image, path: Path) -> None:
     bg = Image.alpha_composite(bg, vignette)
 
     # Logo, large and centred above the text.
-    logo_size = 280
+    logo_size = 230
     sym = symbol.copy()
     sym.thumbnail((logo_size, logo_size), Image.LANCZOS)
     logo_x = (width - sym.width) // 2
-    logo_y = 90
+    logo_y = 70
     bg.paste(sym, (logo_x, logo_y), sym)
 
     draw = ImageDraw.Draw(bg)
-    title_font = load_font(124)
-    tag_font = load_font(40)
+    title_font_size = 110
+    tag_font_size = 36
+    title_font = load_font(title_font_size)
+    tag_font = load_font(tag_font_size)
 
     title = "OneBreath"
     tagline = "Train your breath. Find your calm."
+
+    # Use generous fixed line heights so descenders never collide with the next line.
+    title_line_h = int(title_font_size * 1.35)
+    tag_line_h = int(tag_font_size * 1.4)
 
     title_bbox = draw.textbbox((0, 0), title, font=title_font)
     tag_bbox = draw.textbbox((0, 0), tagline, font=tag_font)
     title_w = title_bbox[2] - title_bbox[0]
     tag_w = tag_bbox[2] - tag_bbox[0]
 
-    title_y = logo_y + sym.height + 40
-    tag_y = title_y + (title_bbox[3] - title_bbox[1]) + 18
+    title_y = logo_y + sym.height + 30
+    tag_y = title_y + title_line_h + 10
 
     draw.text(((width - title_w) // 2, title_y), title, fill=(255, 255, 255, 255), font=title_font)
     draw.text(((width - tag_w) // 2, tag_y), tagline, fill=(127, 231, 196, 255), font=tag_font)
+    _ = tag_line_h  # reserved for future multi-line taglines
 
     bg.convert("RGB").save(path, "PNG", optimize=True)
 
