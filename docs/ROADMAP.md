@@ -13,9 +13,9 @@
 
 ## v1.1 — Polish
 - [ ] Onboarding (3 screens)
-- [ ] Configurable breathe-up rounds (UI control)
+- [x] Configurable breathe-up rounds (UI control)
 - [ ] Box breathing preset
-- [ ] Per-session notes
+- [x] Per-session notes
 
 ## v1.2 — Sync & Export
 - [ ] CSV export
