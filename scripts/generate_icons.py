@@ -1,16 +1,14 @@
-"""Generate improved OneBreath app icons from the source artwork.
+"""Generate OneBreath PWA icons from the source artwork.
 
-Improvements over the original `assets/OneBreath-icon.png`:
-  * Drops the "BREATH HOLD" text label (launcher icons should be text-free).
-  * Re-centers the stopwatch+lung symbol with proper safe-area padding so
-    the artwork is not clipped by iOS/Android icon masks.
-  * Refreshes the teal gradient background and aligns it with the splash
-    background color for visual cohesion.
-  * Emits the platform-specific files Expo expects:
-      - assets/icon.png             (1024x1024, square iOS/launcher)
-      - assets/adaptive-icon.png    (1024x1024, Android foreground w/ extra padding)
-      - assets/splash-icon.png      (1024x1024, used by splash screen)
-      - assets/favicon.png          (48x48,   web favicon)
+Reads scripts/source/OneBreath-icon.png (the original 2048x2048 marketing
+artwork) and emits clean, text-free, properly-padded variants:
+
+  * assets/icon.png             -- Expo dev fallback icon (1024x1024)
+  * assets/favicon.png          -- web favicon (48x48)
+  * public/icons/icon-192.png   -- PWA standard
+  * public/icons/icon-512.png   -- PWA standard
+  * public/icons/icon-maskable-512.png  -- PWA maskable (extra padding)
+  * public/icons/apple-touch-icon.png   -- iOS Add-to-Home-Screen (180x180)
 
 Run with: `python scripts/generate_icons.py`
 """
@@ -100,31 +98,22 @@ def main() -> None:
     src = Image.open(SRC).convert("RGBA")
     symbol = extract_symbol(src)
 
+    # Expo dev/runtime fallback icon (small, kept for `expo start` UI).
     composite_icon(symbol, 1024, padding=0.12, rounded=True).save(ASSETS / "icon.png")
-
-    fg_only = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
-    sym = symbol.copy()
-    inner = int(1024 * (1 - 2 * 0.25))
-    sym.thumbnail((inner, inner), Image.LANCZOS)
-    fg_only.paste(sym, ((1024 - sym.width) // 2, (1024 - sym.height) // 2), sym)
-    fg_only.save(ASSETS / "adaptive-icon.png")
-
-    composite_icon(symbol, 1024, padding=0.18, rounded=False).save(ASSETS / "splash-icon.png")
     composite_icon(symbol, 48, padding=0.10, rounded=True).save(ASSETS / "favicon.png")
 
     # PWA / web icons (live in /public so they're served as static assets).
     public = ROOT / "public" / "icons"
     public.mkdir(parents=True, exist_ok=True)
-    # Standard PWA sizes (square, no rounding -- the manifest declares purpose).
     composite_icon(symbol, 192, padding=0.12, rounded=False).save(public / "icon-192.png")
     composite_icon(symbol, 512, padding=0.12, rounded=False).save(public / "icon-512.png")
     # Maskable icon needs ~20% safe padding so OS-applied masks don't crop the glyph.
     composite_icon(symbol, 512, padding=0.22, rounded=False).save(public / "icon-maskable-512.png")
-    # iOS home-screen icon (Safari "Add to Home Screen"). 180x180 is the canonical size.
+    # iOS home-screen icon (Safari "Add to Home Screen"). 180x180 is canonical.
     composite_icon(symbol, 180, padding=0.12, rounded=False).save(public / "apple-touch-icon.png")
 
     print("Generated:")
-    for name in ("icon.png", "adaptive-icon.png", "splash-icon.png", "favicon.png"):
+    for name in ("icon.png", "favicon.png"):
         p = ASSETS / name
         print(f"  {p}  ({p.stat().st_size} bytes)")
     for name in ("icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):

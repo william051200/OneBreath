@@ -45,17 +45,8 @@ npm run android   # requires Android Studio + emulator
 npm run web       # quickest preview, runs in browser
 ```
 
-### Building for the App Store / Play Store
-Use **EAS Build** (free for hobby projects, runs on Expo's cloud — no Mac required):
-```bash
-npm install -g eas-cli
-eas build --platform ios
-eas build --platform android
-```
-See [docs/RELEASING.md](docs/RELEASING.md) for the full iOS runbook.
-
 ### 📲 Install on iPhone / Android (no App Store, free)
-OneBreath is also a **Progressive Web App** — no Apple Developer account, no install fees.
+OneBreath ships as a **Progressive Web App** — no Apple Developer account, no install fees, works on iPhone, iPad, Android, and desktop.
 
 1. Deploy once to Vercel (or any static host):
    ```bash
@@ -83,8 +74,10 @@ OneBreath/
 │   ├── theme/                    # colors, animation tokens
 │   ├── timer/                    # state machine + formatting
 │   └── storage/                  # AsyncStorage session repo
-├── assets/                       # icons, splash
+├── assets/                       # icon, favicon
+├── public/                       # PWA manifest + icons (served as-is)
 ├── app.json                      # Expo config
+├── vercel.json                   # Vercel deploy config
 ├── babel.config.js               # Reanimated plugin
 └── package.json
 ```
@@ -94,7 +87,6 @@ OneBreath/
 - [Architecture](docs/ARCHITECTURE.md) — modules, state machine, data flow
 - [Design](docs/DESIGN.md) — visual language, animations, color palette
 - [Roadmap](docs/ROADMAP.md) — what's next
-- [Releasing](docs/RELEASING.md) — iOS build & App Store runbook
 - [Privacy](docs/PRIVACY.md) — privacy policy (no data leaves the device)
 - [Contributing](docs/CONTRIBUTING.md) — how to help
 
