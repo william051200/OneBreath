@@ -23,6 +23,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="box"
+        options={{
+          title: 'Box',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="square-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'History',
