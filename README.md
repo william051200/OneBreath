@@ -52,6 +52,21 @@ npm install -g eas-cli
 eas build --platform ios
 eas build --platform android
 ```
+See [docs/RELEASING.md](docs/RELEASING.md) for the full iOS runbook.
+
+### 📲 Install on iPhone / Android (no App Store, free)
+OneBreath is also a **Progressive Web App** — no Apple Developer account, no install fees.
+
+1. Deploy once to Vercel (or any static host):
+   ```bash
+   npm install -g vercel
+   vercel --prod
+   ```
+   This runs `npx expo export -p web`, publishes the `dist/` folder, and gives you a URL like `onebreath.vercel.app`.
+2. **On iPhone**: open the URL in **Safari** → tap the **Share** button → **Add to Home Screen**.
+3. **On Android**: open in **Chrome** → tap the menu → **Install app** (or **Add to Home Screen**).
+
+The app launches full-screen, works offline (data is local-only), and looks/feels like a native app. Web caveat: haptics are unavailable on iOS Safari.
 
 ## 📁 Project Structure
 ```
@@ -79,6 +94,8 @@ OneBreath/
 - [Architecture](docs/ARCHITECTURE.md) — modules, state machine, data flow
 - [Design](docs/DESIGN.md) — visual language, animations, color palette
 - [Roadmap](docs/ROADMAP.md) — what's next
+- [Releasing](docs/RELEASING.md) — iOS build & App Store runbook
+- [Privacy](docs/PRIVACY.md) — privacy policy (no data leaves the device)
 - [Contributing](docs/CONTRIBUTING.md) — how to help
 
 ## 📄 License

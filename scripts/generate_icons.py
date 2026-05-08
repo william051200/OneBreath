@@ -112,9 +112,23 @@ def main() -> None:
     composite_icon(symbol, 1024, padding=0.18, rounded=False).save(ASSETS / "splash-icon.png")
     composite_icon(symbol, 48, padding=0.10, rounded=True).save(ASSETS / "favicon.png")
 
+    # PWA / web icons (live in /public so they're served as static assets).
+    public = ROOT / "public" / "icons"
+    public.mkdir(parents=True, exist_ok=True)
+    # Standard PWA sizes (square, no rounding -- the manifest declares purpose).
+    composite_icon(symbol, 192, padding=0.12, rounded=False).save(public / "icon-192.png")
+    composite_icon(symbol, 512, padding=0.12, rounded=False).save(public / "icon-512.png")
+    # Maskable icon needs ~20% safe padding so OS-applied masks don't crop the glyph.
+    composite_icon(symbol, 512, padding=0.22, rounded=False).save(public / "icon-maskable-512.png")
+    # iOS home-screen icon (Safari "Add to Home Screen"). 180x180 is the canonical size.
+    composite_icon(symbol, 180, padding=0.12, rounded=False).save(public / "apple-touch-icon.png")
+
     print("Generated:")
     for name in ("icon.png", "adaptive-icon.png", "splash-icon.png", "favicon.png"):
         p = ASSETS / name
+        print(f"  {p}  ({p.stat().st_size} bytes)")
+    for name in ("icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):
+        p = public / name
         print(f"  {p}  ({p.stat().st_size} bytes)")
 
 
