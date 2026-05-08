@@ -12,7 +12,7 @@
 - [x] Vercel deploy config
 
 ## v1.1 — Polish
-- [ ] Onboarding (3 screens)
+- [x] Onboarding (3 screens)
 - [x] Configurable breathe-up rounds (UI control)
 - [ ] Box breathing preset
 - [x] Per-session notes
