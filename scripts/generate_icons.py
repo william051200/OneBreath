@@ -127,45 +127,50 @@ def load_font(size: int) -> ImageFont.FreeTypeFont:
 
 
 def make_og_image(symbol: Image.Image, path: Path) -> None:
-    """1200x630 social preview: logo on the left, title + tagline on the right."""
+    """1200x630 social preview, optimized to read well even at small sizes."""
     width, height = 1200, 630
     bg = make_gradient_rect(width, height)
 
-    # Logo on the left third
-    logo_size = 360
+    # Soft dark vignette in the lower half so white text always pops.
+    vignette = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    vd = ImageDraw.Draw(vignette)
+    for i in range(height // 2, height):
+        alpha = int(120 * (i - height // 2) / (height // 2))
+        vd.line([(0, i), (width, i)], fill=(11, 26, 46, alpha))
+    bg = Image.alpha_composite(bg, vignette)
+
+    # Logo, large and centred above the text.
+    logo_size = 230
     sym = symbol.copy()
     sym.thumbnail((logo_size, logo_size), Image.LANCZOS)
-    logo_x = 130
-    logo_y = (height - sym.height) // 2
+    logo_x = (width - sym.width) // 2
+    logo_y = 70
     bg.paste(sym, (logo_x, logo_y), sym)
 
     draw = ImageDraw.Draw(bg)
-    title_font = load_font(78)
-    tag_font = load_font(34)
+    title_font_size = 110
+    tag_font_size = 36
+    title_font = load_font(title_font_size)
+    tag_font = load_font(tag_font_size)
 
-    text_x = 560
     title = "OneBreath"
     tagline = "Train your breath. Find your calm."
-    sub = "onebreath-app.vercel.app"
 
-    # Vertically centre the text block
+    # Use generous fixed line heights so descenders never collide with the next line.
+    title_line_h = int(title_font_size * 1.35)
+    tag_line_h = int(tag_font_size * 1.4)
+
     title_bbox = draw.textbbox((0, 0), title, font=title_font)
     tag_bbox = draw.textbbox((0, 0), tagline, font=tag_font)
-    sub_bbox = draw.textbbox((0, 0), sub, font=tag_font)
-    title_h = title_bbox[3] - title_bbox[1]
-    tag_h = tag_bbox[3] - tag_bbox[1]
-    sub_h = sub_bbox[3] - sub_bbox[1]
-    block_h = title_h + 24 + tag_h + 28 + sub_h
-    y = (height - block_h) // 2
+    title_w = title_bbox[2] - title_bbox[0]
+    tag_w = tag_bbox[2] - tag_bbox[0]
 
-    draw.text((text_x, y), title, fill=(237, 239, 247, 255), font=title_font)
-    draw.text((text_x, y + title_h + 24), tagline, fill=(237, 239, 247, 230), font=tag_font)
-    draw.text(
-        (text_x, y + title_h + 24 + tag_h + 28),
-        sub,
-        fill=(127, 231, 196, 255),  # accent
-        font=tag_font,
-    )
+    title_y = logo_y + sym.height + 30
+    tag_y = title_y + title_line_h + 10
+
+    draw.text(((width - title_w) // 2, title_y), title, fill=(255, 255, 255, 255), font=title_font)
+    draw.text(((width - tag_w) // 2, tag_y), tagline, fill=(127, 231, 196, 255), font=tag_font)
+    _ = tag_line_h  # reserved for future multi-line taglines
 
     bg.convert("RGB").save(path, "PNG", optimize=True)
 
