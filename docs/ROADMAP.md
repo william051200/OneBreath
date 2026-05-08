@@ -8,7 +8,7 @@
 - [x] Stats screen with animated chart
 - [x] Calm/zen UI with breathing orb (Reanimated)
 - [x] Reduce Motion fallback
-- [ ] Real app icon + splash artwork
+- [x] Real app icon + splash artwork
 
 ## v1.1 — Polish
 - [ ] Onboarding (3 screens)
