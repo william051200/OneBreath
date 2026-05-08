@@ -1,7 +1,13 @@
 import { useEffect, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useState } from 'react';
-import { loadSessions, saveSession, deleteSession, SessionRecord } from './sessions';
+import {
+  loadSessions,
+  saveSession,
+  deleteSession,
+  updateSession,
+  SessionRecord,
+} from './sessions';
 
 export function useSessions() {
   const [sessions, setSessions] = useState<SessionRecord[]>([]);
@@ -34,5 +40,13 @@ export function useSessions() {
     setSessions(next);
   }, []);
 
-  return { sessions, loading, reload, add, remove };
+  const update = useCallback(
+    async (id: string, patch: Partial<Omit<SessionRecord, 'id'>>) => {
+      const next = await updateSession(id, patch);
+      setSessions(next);
+    },
+    []
+  );
+
+  return { sessions, loading, reload, add, remove, update };
 }
