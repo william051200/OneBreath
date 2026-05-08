@@ -2,94 +2,32 @@
 
 > Hold your breath. Track your limit. Beat it.
 
-**🚀 Try it now: [one-breath-one.vercel.app](https://one-breath-one.vercel.app)** — installs to your iPhone or Android home screen straight from the browser, no app store needed.
+**🚀 Try it now: [onebreath-app.vercel.app](https://onebreath-app.vercel.app)**
 
-**OneBreath** is a beautifully simple breath-hold timer built with React Native (Expo). Whether you're a freediver training static apnea, a swimmer building lung capacity, a meditator exploring breathwork, or just curious about your limits — OneBreath gives you a calm, animated, distraction-free way to time and track every hold.
+OneBreath is a beautifully simple breath-hold timer. Whether you're a freediver training static apnea, a swimmer building lung capacity, a meditator exploring breathwork, or just curious about your limits — OneBreath gives you a calm, animated, distraction-free way to time and track every hold.
 
 ## ✨ Features
 
-- ⏱ **One-tap breath-hold timer** with background-safe accuracy
-- 🌬 **Guided breathe-up** intervals before each hold
-- 🏆 **Personal best** tracking and full session history
-- 📈 **Animated trend chart** of your progress
-- 🎨 **Calm zen UI** — soft shifting gradients, breathing orb, slow pulses (Reanimated)
-- 📱 **Cross-platform** — iOS, Android, and web from one codebase
-- 🔒 **Privacy-first** — no accounts, no analytics, no network calls
+- ⏱ One-tap breath-hold timer with background-safe accuracy
+- 🌬 Guided breathe-up intervals before each hold
+- 🏆 Personal best tracking and full session history
+- 📈 Animated trend chart of your progress
+- 🎨 Calm zen UI — soft shifting gradients, breathing orb, slow pulses
+- 📱 Installs to any phone or desktop home screen (PWA)
+- 🔒 Privacy-first — no accounts, no analytics, no network calls
 
-## 🛠 Tech Stack
+## 📲 Install on your phone (no App Store, free)
 
-- **Expo** (SDK 54) + **React Native** + **TypeScript**
-- **expo-router** — file-based navigation
-- **react-native-reanimated** — 60fps native animations
-- **expo-linear-gradient** + **react-native-svg**
-- **react-native-gifted-charts** — animated stats chart
-- **AsyncStorage** — local session persistence
-- **expo-haptics** + **expo-keep-awake**
+1. Open **[onebreath-app.vercel.app](https://onebreath-app.vercel.app)** on your phone.
+2. **iPhone (Safari):** Share → Add to Home Screen.
+3. **Android (Chrome):** Menu → Install app.
+4. **Desktop (Chrome/Edge):** Install icon in the address bar.
 
-## 🚀 Getting Started
-
-### Requirements
-- Node.js 20+ ([install via winget](https://nodejs.org): `winget install OpenJS.NodeJS.LTS`)
-- Expo Go app on your phone ([App Store](https://apps.apple.com/app/expo-go/id982107779) / [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent))
-
-### Run on your phone (Windows-friendly!)
-```bash
-git clone https://github.com/william051200/OneBreath.git
-cd OneBreath
-npm install
-npm start
-```
-Then **scan the QR code** with the Expo Go app. Edit and save — the app reloads instantly.
-
-### Run on emulator
-```bash
-npm run android   # requires Android Studio + emulator
-npm run web       # quickest preview, runs in browser
-```
-
-### 📲 Install on iPhone / Android (no App Store, free)
-OneBreath ships as a **Progressive Web App** — no Apple Developer account, no install fees, works on iPhone, iPad, Android, and desktop.
-
-**Live URL:** [https://one-breath-one.vercel.app](https://one-breath-one.vercel.app)
-
-1. **On iPhone**: open the URL in **Safari** → tap the **Share** button → **Add to Home Screen**.
-2. **On Android**: open in **Chrome** → tap the menu → **Install app** (or **Add to Home Screen**).
-3. **On desktop**: Chrome / Edge show an install icon in the address bar.
-
-The app launches full-screen, works offline (data is local-only), and looks/feels like a native app. Web caveat: haptics are unavailable on iOS Safari.
-
-#### Deploying your own copy
-```bash
-npm install -g vercel
-vercel --prod
-```
-This runs `npx expo export -p web`, publishes the `dist/` folder, and gives you your own URL.
-
-## 📁 Project Structure
-```
-OneBreath/
-├── app/                          # expo-router file-based routes
-│   ├── _layout.tsx               # Root stack
-│   └── (tabs)/
-│       ├── _layout.tsx           # Bottom tabs
-│       ├── index.tsx             # Hold timer screen
-│       ├── history.tsx           # Past sessions
-│       └── stats.tsx             # Charts
-├── src/
-│   ├── components/               # BreathingOrb, PulseRing, etc.
-│   ├── theme/                    # colors, animation tokens
-│   ├── timer/                    # state machine + formatting
-│   └── storage/                  # AsyncStorage session repo
-├── assets/                       # icon, favicon
-├── public/                       # PWA manifest + icons (served as-is)
-├── app.json                      # Expo config
-├── vercel.json                   # Vercel deploy config
-├── babel.config.js               # Reanimated plugin
-└── package.json
-```
+The app launches full-screen, works offline, and looks/feels like a native app.
 
 ## 📚 Documentation
 
+- [Development](docs/DEVELOPMENT.md) — run locally, deploy your own copy, regenerate icons
 - [Architecture](docs/ARCHITECTURE.md) — modules, state machine, data flow
 - [Design](docs/DESIGN.md) — visual language, animations, color palette
 - [Roadmap](docs/ROADMAP.md) — what's next

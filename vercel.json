@@ -4,6 +4,11 @@
   "outputDirectory": "dist",
   "framework": null,
   "installCommand": "npm install",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
   "headers": [
     {
       "source": "/manifest.webmanifest",
