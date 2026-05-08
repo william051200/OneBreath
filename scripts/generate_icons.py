@@ -9,6 +9,7 @@ artwork) and emits clean, text-free, properly-padded variants:
   * public/icons/icon-512.png   -- PWA standard
   * public/icons/icon-maskable-512.png  -- PWA maskable (extra padding)
   * public/icons/apple-touch-icon.png   -- iOS Add-to-Home-Screen (180x180)
+  * public/og-image.png         -- 1200x630 social preview card
 
 Run with: `python scripts/generate_icons.py`
 """
@@ -16,7 +17,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
@@ -94,6 +95,81 @@ def composite_icon(symbol: Image.Image, size: int, padding: float, rounded: bool
     return bg
 
 
+def make_gradient_rect(width: int, height: int) -> Image.Image:
+    """Diagonal teal gradient sized to an arbitrary rectangle."""
+    grad = Image.new("RGBA", (width, height), GRADIENT_TOP_LEFT)
+    draw = ImageDraw.Draw(grad)
+    tl = GRADIENT_TOP_LEFT
+    br = GRADIENT_BOTTOM_RIGHT
+    diag = width + height
+    for i in range(diag):
+        t = i / max(1, diag - 1)
+        color = tuple(int(tl[c] + (br[c] - tl[c]) * t) for c in range(4))
+        draw.line([(i, 0), (0, i)], fill=color)
+    return grad.filter(ImageFilter.GaussianBlur(radius=max(1, int(min(width, height) * 0.015))))
+
+
+def load_font(size: int) -> ImageFont.FreeTypeFont:
+    """Best-effort font loader: try a few common sans-serifs, then default."""
+    candidates = [
+        "C:/Windows/Fonts/segoeuib.ttf",  # Segoe UI Bold (Windows)
+        "C:/Windows/Fonts/segoeui.ttf",
+        "/System/Library/Fonts/SFNS.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "arial.ttf",
+    ]
+    for path in candidates:
+        try:
+            return ImageFont.truetype(path, size)
+        except (OSError, IOError):
+            continue
+    return ImageFont.load_default()
+
+
+def make_og_image(symbol: Image.Image, path: Path) -> None:
+    """1200x630 social preview: logo on the left, title + tagline on the right."""
+    width, height = 1200, 630
+    bg = make_gradient_rect(width, height)
+
+    # Logo on the left third
+    logo_size = 360
+    sym = symbol.copy()
+    sym.thumbnail((logo_size, logo_size), Image.LANCZOS)
+    logo_x = 130
+    logo_y = (height - sym.height) // 2
+    bg.paste(sym, (logo_x, logo_y), sym)
+
+    draw = ImageDraw.Draw(bg)
+    title_font = load_font(78)
+    tag_font = load_font(34)
+
+    text_x = 560
+    title = "OneBreath"
+    tagline = "Train your breath. Find your calm."
+    sub = "onebreath-app.vercel.app"
+
+    # Vertically centre the text block
+    title_bbox = draw.textbbox((0, 0), title, font=title_font)
+    tag_bbox = draw.textbbox((0, 0), tagline, font=tag_font)
+    sub_bbox = draw.textbbox((0, 0), sub, font=tag_font)
+    title_h = title_bbox[3] - title_bbox[1]
+    tag_h = tag_bbox[3] - tag_bbox[1]
+    sub_h = sub_bbox[3] - sub_bbox[1]
+    block_h = title_h + 24 + tag_h + 28 + sub_h
+    y = (height - block_h) // 2
+
+    draw.text((text_x, y), title, fill=(237, 239, 247, 255), font=title_font)
+    draw.text((text_x, y + title_h + 24), tagline, fill=(237, 239, 247, 230), font=tag_font)
+    draw.text(
+        (text_x, y + title_h + 24 + tag_h + 28),
+        sub,
+        fill=(127, 231, 196, 255),  # accent
+        font=tag_font,
+    )
+
+    bg.convert("RGB").save(path, "PNG", optimize=True)
+
+
 def main() -> None:
     src = Image.open(SRC).convert("RGBA")
     symbol = extract_symbol(src)
@@ -112,6 +188,10 @@ def main() -> None:
     # iOS home-screen icon (Safari "Add to Home Screen"). 180x180 is canonical.
     composite_icon(symbol, 180, padding=0.12, rounded=False).save(public / "apple-touch-icon.png")
 
+    # Social preview card (Open Graph / Twitter Cards).
+    og_path = ROOT / "public" / "og-image.png"
+    make_og_image(symbol, og_path)
+
     print("Generated:")
     for name in ("icon.png", "favicon.png"):
         p = ASSETS / name
@@ -119,6 +199,7 @@ def main() -> None:
     for name in ("icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"):
         p = public / name
         print(f"  {p}  ({p.stat().st_size} bytes)")
+    print(f"  {og_path}  ({og_path.stat().st_size} bytes)")
 
 
 if __name__ == "__main__":
