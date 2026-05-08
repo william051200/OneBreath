@@ -18,6 +18,29 @@ export default function Root({ children }: PropsWithChildren) {
         />
         <meta name="description" content="Hold your breath. Track your limit. Beat it." />
 
+        {/* Open Graph (Facebook, LinkedIn, Threads, Discord, iMessage, etc.) */}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="OneBreath" />
+        <meta property="og:title" content="OneBreath — Train your breath. Find your calm." />
+        <meta
+          property="og:description"
+          content="A privacy-first breathing app. Time your breath holds, practice box breathing. No account, no tracking — everything stays on your device."
+        />
+        <meta property="og:url" content="https://onebreath-app.vercel.app/" />
+        <meta property="og:image" content="https://onebreath-app.vercel.app/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="OneBreath — Train your breath. Find your calm." />
+
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="OneBreath — Train your breath. Find your calm." />
+        <meta
+          name="twitter:description"
+          content="A privacy-first breathing app. Time your breath holds, practice box breathing. No account, no tracking."
+        />
+        <meta name="twitter:image" content="https://onebreath-app.vercel.app/og-image.png" />
+
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#0B1A2E" />
         <meta name="color-scheme" content="dark" />
