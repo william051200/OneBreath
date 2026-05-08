@@ -22,7 +22,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
-SRC = ASSETS / "OneBreath-icon.png"
+SRC = ROOT / "scripts" / "source" / "OneBreath-icon.png"
 
 GRADIENT_TOP_LEFT = (11, 26, 46, 255)       # #0B1A2E - matches splash bg
 GRADIENT_BOTTOM_RIGHT = (38, 166, 178, 255) # #26A6B2 - teal accent
