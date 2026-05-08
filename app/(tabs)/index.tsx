@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -7,15 +7,23 @@ import { BreathingOrb } from '../../src/components/BreathingOrb';
 import { PulseRing } from '../../src/components/PulseRing';
 import { AnimatedCounter } from '../../src/components/AnimatedCounter';
 import { ActionButton } from '../../src/components/ActionButton';
+import { Stepper } from '../../src/components/Stepper';
 import { Colors, Layout } from '../../src/theme/theme';
 import { useTimerMachine } from '../../src/timer/useTimerMachine';
 import { useElapsed } from '../../src/timer/useElapsed';
 import { liveDisplay, compact } from '../../src/timer/format';
 import { useSessions } from '../../src/storage/useSessions';
+import { useRoundsPreference, ROUNDS_DEFAULT } from '../../src/storage/useRoundsPreference';
 
 export default function TimerScreen() {
-  const machine = useTimerMachine(3);
+  const machine = useTimerMachine(ROUNDS_DEFAULT);
+  const prefs = useRoundsPreference();
   const { sessions, add } = useSessions();
+
+  // Keep the timer machine in sync with the persisted preference.
+  useEffect(() => {
+    if (prefs.loaded) machine.setRounds(prefs.rounds);
+  }, [prefs.loaded, prefs.rounds, machine]);
 
   const personalBest = useMemo(
     () => sessions.reduce((m, s) => Math.max(m, s.holdDuration), 0),
@@ -54,15 +62,27 @@ export default function TimerScreen() {
         </View>
 
         <View style={styles.actions}>
-          <Actions
-            phase={machine.phase}
-            onStart={machine.startBreatheUp}
-            onSkip={machine.skipToReady}
-            onHold={machine.beginHold}
-            onRelease={machine.releaseHold}
-            onDiscard={machine.reset}
-            onSave={onSave}
-          />
+          {machine.phase.kind === 'idle' && (
+            <Stepper
+              label="BREATHE-UP ROUNDS"
+              value={prefs.rounds}
+              onIncrement={prefs.increment}
+              onDecrement={prefs.decrement}
+              canIncrement={prefs.canIncrement}
+              canDecrement={prefs.canDecrement}
+            />
+          )}
+          <View style={styles.actionRow}>
+            <Actions
+              phase={machine.phase}
+              onStart={machine.startBreatheUp}
+              onSkip={machine.skipToReady}
+              onHold={machine.beginHold}
+              onRelease={machine.releaseHold}
+              onDiscard={machine.reset}
+              onSave={onSave}
+            />
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -184,5 +204,6 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   headline: { color: Colors.text, fontSize: 22, fontWeight: '500' },
   dim: { color: Colors.textDim, fontSize: 14, marginTop: 6 },
-  actions: { paddingBottom: 16, flexDirection: 'row' },
+  actions: { paddingBottom: 16, gap: 12 },
+  actionRow: { flexDirection: 'row' },
 });
