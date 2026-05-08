@@ -2,6 +2,8 @@
 
 > Hold your breath. Track your limit. Beat it.
 
+**🚀 Try it now: [one-breath-one.vercel.app](https://one-breath-one.vercel.app)** — installs to your iPhone or Android home screen straight from the browser, no app store needed.
+
 **OneBreath** is a beautifully simple breath-hold timer built with React Native (Expo). Whether you're a freediver training static apnea, a swimmer building lung capacity, a meditator exploring breathwork, or just curious about your limits — OneBreath gives you a calm, animated, distraction-free way to time and track every hold.
 
 ## ✨ Features
@@ -48,16 +50,20 @@ npm run web       # quickest preview, runs in browser
 ### 📲 Install on iPhone / Android (no App Store, free)
 OneBreath ships as a **Progressive Web App** — no Apple Developer account, no install fees, works on iPhone, iPad, Android, and desktop.
 
-1. Deploy once to Vercel (or any static host):
-   ```bash
-   npm install -g vercel
-   vercel --prod
-   ```
-   This runs `npx expo export -p web`, publishes the `dist/` folder, and gives you a URL like `onebreath.vercel.app`.
-2. **On iPhone**: open the URL in **Safari** → tap the **Share** button → **Add to Home Screen**.
-3. **On Android**: open in **Chrome** → tap the menu → **Install app** (or **Add to Home Screen**).
+**Live URL:** [https://one-breath-one.vercel.app](https://one-breath-one.vercel.app)
+
+1. **On iPhone**: open the URL in **Safari** → tap the **Share** button → **Add to Home Screen**.
+2. **On Android**: open in **Chrome** → tap the menu → **Install app** (or **Add to Home Screen**).
+3. **On desktop**: Chrome / Edge show an install icon in the address bar.
 
 The app launches full-screen, works offline (data is local-only), and looks/feels like a native app. Web caveat: haptics are unavailable on iOS Safari.
+
+#### Deploying your own copy
+```bash
+npm install -g vercel
+vercel --prod
+```
+This runs `npx expo export -p web`, publishes the `dist/` folder, and gives you your own URL.
 
 ## 📁 Project Structure
 ```
