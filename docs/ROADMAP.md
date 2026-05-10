@@ -27,7 +27,7 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 
 ## v1.2 — Sync & Export
 - [x] CSV export
-- [ ] Import / restore from CSV
+- [x] Import / restore from CSV
 - [x] Offline-first service worker for full PWA caching
 
 ## v1.3 — Help & UX polish

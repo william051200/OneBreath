@@ -8,13 +8,15 @@ import { SessionDetailModal } from '../../src/components/SessionDetailModal';
 import { useSessions } from '../../src/storage/useSessions';
 import { SessionRecord } from '../../src/storage/sessions';
 import { exportSessionsToCsv } from '../../src/storage/exportSessions';
+import { importSessionsFromCsv } from '../../src/storage/importSessions';
 import { compact } from '../../src/timer/format';
 import { Colors, Layout } from '../../src/theme/theme';
 
 export default function HistoryScreen() {
-  const { sessions, remove, update } = useSessions();
+  const { sessions, remove, update, reload } = useSessions();
   const [selected, setSelected] = useState<SessionRecord | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const personalBest = useMemo(
     () => sessions.reduce((m, s) => Math.max(m, s.holdDuration), 0),
@@ -41,12 +43,60 @@ export default function HistoryScreen() {
     }
   };
 
+  const handleImport = async () => {
+    if (importing) return;
+    setImporting(true);
+    try {
+      const outcome = await importSessionsFromCsv();
+      if (outcome.kind === 'unsupported') {
+        Alert.alert(
+          'Import not available',
+          'CSV import is only supported in the web app for now.'
+        );
+        return;
+      }
+      if (outcome.kind === 'cancelled') return;
+
+      await reload();
+      const errorCount = outcome.result.errors.length;
+      const skipped = outcome.result.sessions.length - outcome.added;
+      const lines: string[] = [];
+      lines.push(`${outcome.added} session${outcome.added === 1 ? '' : 's'} added.`);
+      if (skipped > 0) {
+        lines.push(`${skipped} skipped (already in your history).`);
+      }
+      if (errorCount > 0) {
+        const preview = outcome.result.errors
+          .slice(0, 3)
+          .map((e) => `Line ${e.line}: ${e.message}`)
+          .join('\n');
+        const more = errorCount > 3 ? `\n…and ${errorCount - 3} more.` : '';
+        lines.push(`${errorCount} row${errorCount === 1 ? '' : 's'} could not be parsed:\n${preview}${more}`);
+      }
+      const title =
+        outcome.added === 0 && errorCount > 0 && outcome.result.sessions.length === 0
+          ? 'Import failed'
+          : 'Import complete';
+      const message = lines.join('\n\n');
+      // react-native-web's Alert.alert is a no-op without a callback config
+      // in some setups, so fall back to window.alert directly on web.
+      if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+        window.alert(`${title}\n\n${message}`);
+      } else {
+        Alert.alert(title, message);
+      }
+    } finally {
+      setImporting(false);
+    }
+  };
+
   // Keep the selected snapshot in sync if its underlying record changes.
   const liveSelected = selected
     ? sessions.find((s) => s.id === selected.id) ?? null
     : null;
 
   const canExport = sessions.length > 0 && !exporting;
+  const canImport = !importing;
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.bgDeep }}>
@@ -54,30 +104,56 @@ export default function HistoryScreen() {
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={styles.headingRow}>
           <Text style={styles.heading}>History</Text>
-          <Pressable
-            onPress={handleExport}
-            disabled={!canExport}
-            accessibilityRole="button"
-            accessibilityLabel="Export sessions as CSV"
-            accessibilityState={{ disabled: !canExport }}
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.exportButton,
-              !canExport && styles.exportButtonDisabled,
-              pressed && canExport && styles.exportButtonPressed,
-            ]}
-          >
-            <Ionicons
-              name="download-outline"
-              size={18}
-              color={canExport ? Colors.text : Colors.textDim}
-            />
-            <Text
-              style={[styles.exportLabel, !canExport && styles.exportLabelDisabled]}
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={handleImport}
+              disabled={!canImport}
+              accessibilityRole="button"
+              accessibilityLabel="Import sessions from CSV"
+              accessibilityState={{ disabled: !canImport }}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.headerButton,
+                !canImport && styles.headerButtonDisabled,
+                pressed && canImport && styles.headerButtonPressed,
+              ]}
             >
-              Export CSV
-            </Text>
-          </Pressable>
+              <Ionicons
+                name="cloud-upload-outline"
+                size={18}
+                color={canImport ? Colors.text : Colors.textDim}
+              />
+              <Text
+                style={[styles.headerLabel, !canImport && styles.headerLabelDisabled]}
+              >
+                Import
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleExport}
+              disabled={!canExport}
+              accessibilityRole="button"
+              accessibilityLabel="Export sessions as CSV"
+              accessibilityState={{ disabled: !canExport }}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.headerButton,
+                !canExport && styles.headerButtonDisabled,
+                pressed && canExport && styles.headerButtonPressed,
+              ]}
+            >
+              <Ionicons
+                name="download-outline"
+                size={18}
+                color={canExport ? Colors.text : Colors.textDim}
+              />
+              <Text
+                style={[styles.headerLabel, !canExport && styles.headerLabelDisabled]}
+              >
+                Export
+              </Text>
+            </Pressable>
+          </View>
         </View>
         {sessions.length === 0 ? (
           <EmptyState
@@ -154,7 +230,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
   },
-  exportButton: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -163,18 +244,18 @@ const styles = StyleSheet.create({
     borderRadius: Layout.cornerRadius,
     backgroundColor: Colors.surface,
   },
-  exportButtonDisabled: {
+  headerButtonDisabled: {
     opacity: 0.5,
   },
-  exportButtonPressed: {
+  headerButtonPressed: {
     opacity: 0.7,
   },
-  exportLabel: {
+  headerLabel: {
     color: Colors.text,
     fontSize: 13,
     fontWeight: '600',
   },
-  exportLabelDisabled: {
+  headerLabelDisabled: {
     color: Colors.textDim,
   },
   list: { padding: Layout.pad, gap: 10 },

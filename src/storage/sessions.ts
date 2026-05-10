@@ -50,3 +50,22 @@ export async function deleteSession(id: string): Promise<SessionRecord[]> {
 export async function clearSessions(): Promise<void> {
   await AsyncStorage.removeItem(STORAGE_KEY);
 }
+
+/**
+ * Merges `incoming` with the currently stored sessions, deduplicating by id
+ * (existing records win), then writes the combined list back. Returns the
+ * merged list and the number of records that were actually added.
+ */
+export async function mergeSessions(
+  incoming: SessionRecord[]
+): Promise<{ sessions: SessionRecord[]; added: number }> {
+  const existing = await loadSessions();
+  const known = new Set(existing.map((s) => s.id));
+  const fresh = incoming.filter((s) => !known.has(s.id));
+  if (fresh.length === 0) {
+    return { sessions: existing, added: 0 };
+  }
+  const merged = [...fresh, ...existing].sort((a, b) => b.date - a.date);
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+  return { sessions: merged, added: fresh.length };
+}
