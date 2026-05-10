@@ -70,6 +70,19 @@ npx tsc --noEmit
 
 There's no test suite yet. PRs that add one are welcome.
 
+## Testing offline mode
+
+The service worker only activates after a real build (it isn't served by `expo start`). To verify offline behavior:
+
+```bash
+npm run build:web
+npx serve dist        # any static server works
+```
+
+Open the URL once with the network on, then in Chrome DevTools → **Application → Service Workers** confirm `service-worker.js` is "activated and running". Switch **Network → Offline** and reload — the app should still boot.
+
+After changing anything in `public/service-worker.js`, **bump `CACHE_VERSION`** so old caches are evicted on the next `activate`. See [ARCHITECTURE.md → Offline-first PWA caching](ARCHITECTURE.md#offline-first-pwa-caching) for the full strategy and constraints.
+
 ## Project structure
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the module map and data flow.

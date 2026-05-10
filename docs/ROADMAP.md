@@ -20,7 +20,7 @@
 ## v1.2 — Sync & Export
 - [ ] CSV export
 - [ ] Import / restore from CSV
-- [ ] Offline-first service worker for full PWA caching
+- [x] Offline-first service worker for full PWA caching
 
 ## v1.3 — Beyond
 - [ ] Localization (Spanish, French, Japanese, Chinese)

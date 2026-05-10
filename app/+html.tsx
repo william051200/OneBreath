@@ -55,6 +55,7 @@ export default function Root({ children }: PropsWithChildren) {
 
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: pageStyles }} />
+        <script src="/service-worker-register.js" defer />
       </head>
       <body>{children}</body>
     </html>

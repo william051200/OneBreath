@@ -7,11 +7,17 @@ OneBreath is a single-target React Native (Expo SDK 54) app written in TypeScrip
 ```
 app/                  expo-router routes (file-based navigation)
   _layout.tsx         Root <Stack>
+  +html.tsx           Custom <html> for the static web build (PWA meta + SW registration)
   (tabs)/             Bottom tab group
     _layout.tsx       <Tabs>
     index.tsx         Hold timer screen
     history.tsx       Past sessions
     stats.tsx         Charts
+public/               Static files copied verbatim into dist/ on web export
+  manifest.webmanifest
+  service-worker.js           Offline-first PWA service worker
+  service-worker-register.js  Registers the service worker on window.load
+  icons/                      PWA + apple-touch icons
 src/
   components/         BreathingOrb, PulseRing, AnimatedCounter, ActionButton, etc.
   theme/              Color, animation, layout tokens
@@ -83,3 +89,34 @@ The `useSessions()` hook wraps load / save / delete and re-fetches on screen foc
 ## Testing
 - TypeScript provides static safety (`tsc --noEmit`).
 - No runtime test runner in v1; consider Jest + React Native Testing Library when behavior grows.
+
+## Offline-first PWA caching
+
+OneBreath ships a service worker so the installed PWA boots and runs with zero network on repeat visits.
+
+### Files
+- `public/service-worker.js` — the service worker itself. Statically copied into `dist/` by `expo export -p web`.
+- `public/service-worker-register.js` — small bootstrap that calls `navigator.serviceWorker.register('/service-worker.js')` after `window.load`. Loaded via `<script src="/service-worker-register.js" defer />` injected from `app/+html.tsx`.
+- `vercel.json` — serves both files with `Cache-Control: max-age=0, must-revalidate` so updates are never stuck behind the CDN, and adds `Service-Worker-Allowed: /` to `service-worker.js`.
+
+### Caching strategy
+| Request type | Strategy | Rationale |
+|---|---|---|
+| `request.mode === 'navigate'` | **Network-first**, fall back to cached `/` | Always show the latest HTML when online; still boot when offline. |
+| `/_expo/static/*` (hashed bundles) | **Cache-first** | Filenames are content-hashed, so cached responses are safe to serve forever. |
+| Other same-origin GETs | **Stale-while-revalidate** | Instant response from cache, refresh in the background. |
+| Cross-origin / non-GET | Pass through | Don't intercept third-party traffic or mutations. |
+
+The app shell (`/`, `/manifest.webmanifest`, favicon, `/icons/*`) is **precached on install** so the very first offline launch has the assets it needs.
+
+### Cache versioning & invalidation
+- All caches are namespaced with `CACHE_VERSION` (`onebreath-precache-v1`, `onebreath-runtime-v1`).
+- **Bump `CACHE_VERSION` in `service-worker.js` whenever** the precache list, caching strategy, or anything else in the SW logic changes. The `activate` handler deletes any cache whose name doesn't match the current version.
+- The SW listens for a `'SKIP_WAITING'` postMessage so a future "Update available — reload" UI can activate a new SW on demand.
+
+### Requirements for future PWA changes
+- Anything that should be available offline on first launch must be added to `APP_SHELL_URLS` in `service-worker.js`.
+- New static asset directories that are content-hashed and immutable should be added to `isImmutableAsset()` so they get the cache-first treatment.
+- The SW path **must remain at the site root** (`/service-worker.js`) so its scope covers the whole app — do not move it into a subfolder.
+- Renaming the SW file invalidates the registration for already-installed clients. If you must rename it, also unregister the old path in `service-worker-register.js` for at least one release.
+- Keep `service-worker.js` framework-free vanilla JS. It runs outside the React/Expo bundle and must not import from `src/` or `node_modules/`.
