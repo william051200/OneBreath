@@ -67,10 +67,24 @@ type SessionRecord = {
   date: number;          // epoch ms
   holdDuration: number;  // seconds
   breatheUpRounds: number;
+  notes?: string;        // optional, free-form
 };
 ```
 
-The `useSessions()` hook wraps load / save / delete and re-fetches on screen focus.
+The `useSessions()` hook wraps load / save / delete / `reload` and re-fetches on screen focus.
+
+### Storage & CSV (export, import, merge)
+
+OneBreath persists everything locally — there is no server. To make backup, restore, and migration possible, the History tab can export the local store to a CSV file and import one back in.
+
+- **`src/storage/csv.ts`** — single source of truth for the on-disk CSV format. It exports both directions:
+  - `sessionsToCsv(sessions)` serializer (RFC-4180: CRLF lines, doubled `""` for embedded quotes, fields wrapped in quotes when they contain `,`, `"`, `\r`, or `\n`).
+  - `csvToSessions(text)` parser. Strips a leading BOM, validates the header against `CSV_HEADER` (`id,date,holdDuration,breatheUpRounds,notes`), and skips bad rows while reporting them with line numbers (`{ sessions, errors: [{ line, message }] }`).
+- **`src/storage/exportSessions.ts`** — platform-aware writer. On web it triggers a download via a temporary `<a download>`; on native it falls back to `Sharing.shareAsync` (writing to a temp file under the document directory).
+- **`src/storage/importSessions.ts`** — platform-aware reader. On web it opens a hidden `<input type="file">` picker; on native it currently returns `{ kind: 'unsupported' }` (we deliberately avoid an `expo-document-picker` dependency for now — the History UI shows a friendly alert instead).
+- **`src/storage/sessions.ts → mergeSessions(incoming)`** — dedupe-by-id reconciliation: if an imported session shares an `id` with an existing one, the **existing** record wins (no overwrite). Returns `{ sessions, added }` so the UI can report what changed.
+
+Because `csv.ts` owns both serializer and parser, an exported CSV always round-trips losslessly back through the importer.
 
 ## Navigation
 - Root `<Stack>` (no header) → `(tabs)` group with three bottom tabs: **Hold**, **History**, **Stats**.

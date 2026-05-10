@@ -83,6 +83,18 @@ Open the URL once with the network on, then in Chrome DevTools → **Application
 
 After changing anything in `public/service-worker.js`, **bump `CACHE_VERSION`** so old caches are evicted on the next `activate`. See [ARCHITECTURE.md → Offline-first PWA caching](ARCHITECTURE.md#offline-first-pwa-caching) for the full strategy and constraints.
 
+## Testing CSV import / export
+
+The History tab can export the local store to CSV and import it back. To exercise the round-trip end-to-end:
+
+1. Run `npm run build:web` and serve `dist/` (`npx serve dist`).
+2. Record a session or two so there's something to export.
+3. Open `/history` and click **Export** — a `onebreath-sessions-*.csv` file is downloaded.
+4. Click **Import** and pick the same file. The summary alert should report `0 added, N skipped (already in your history)` — proving the round-trip is lossless and the dedupe-by-id rule held.
+5. To verify error reporting, hand-edit the CSV: change one row's `date` cell to `not-a-date` and import again. The alert should call out the bad row with its line number (e.g. `Line 4: Invalid date "not-a-date"`).
+
+Native (iOS/Android) import is intentionally unsupported in this iteration — the History UI surfaces a friendly alert. Export works on native via the system share sheet. See [ARCHITECTURE.md → Storage & CSV](ARCHITECTURE.md#storage--csv-export-import-merge) for the full module breakdown and the merge-by-id contract.
+
 ## Project structure
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the module map and data flow.

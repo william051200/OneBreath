@@ -10,10 +10,13 @@ OneBreath is a beautifully simple breath-hold timer. Whether you're a freediver 
 
 - ⏱ One-tap breath-hold timer with background-safe accuracy
 - 🌬 Guided breathe-up intervals before each hold
-- 🏆 Personal best tracking and full session history
+- 📦 **Box breathing** preset (4-4-4-4) for calm and focus
+- 🏆 Personal best tracking and full session history with notes
 - 📈 Animated trend chart of your progress
+- 📤 **Export** your sessions to CSV
+- 📥 **Import / restore** from a CSV backup
 - 🎨 Calm zen UI — soft shifting gradients, breathing orb, slow pulses
-- 📱 Installs to any phone or desktop home screen (PWA)
+- 📱 Installs to any phone or desktop home screen (PWA) — **fully offline-first** after first load
 - 🔒 Privacy-first — no accounts, no analytics, no network calls
 
 ## 📲 Install on your phone (no App Store, free)
