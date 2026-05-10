@@ -7,12 +7,14 @@ import { EmptyState } from '../../src/components/EmptyState';
 import { SessionDetailModal } from '../../src/components/SessionDetailModal';
 import { useSessions } from '../../src/storage/useSessions';
 import { SessionRecord } from '../../src/storage/sessions';
+import { exportSessionsToCsv } from '../../src/storage/exportSessions';
 import { compact } from '../../src/timer/format';
 import { Colors, Layout } from '../../src/theme/theme';
 
 export default function HistoryScreen() {
   const { sessions, remove, update } = useSessions();
   const [selected, setSelected] = useState<SessionRecord | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const personalBest = useMemo(
     () => sessions.reduce((m, s) => Math.max(m, s.holdDuration), 0),
@@ -26,16 +28,57 @@ export default function HistoryScreen() {
     ]);
   };
 
+  const handleExport = async () => {
+    if (exporting || sessions.length === 0) return;
+    setExporting(true);
+    try {
+      const ok = await exportSessionsToCsv(sessions);
+      if (!ok) {
+        Alert.alert('Export failed', 'OneBreath could not export your sessions.');
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
+
   // Keep the selected snapshot in sync if its underlying record changes.
   const liveSelected = selected
     ? sessions.find((s) => s.id === selected.id) ?? null
     : null;
 
+  const canExport = sessions.length > 0 && !exporting;
+
   return (
     <View style={{ flex: 1, backgroundColor: Colors.bgDeep }}>
       <GradientBackground />
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <Text style={styles.heading}>History</Text>
+        <View style={styles.headingRow}>
+          <Text style={styles.heading}>History</Text>
+          <Pressable
+            onPress={handleExport}
+            disabled={!canExport}
+            accessibilityRole="button"
+            accessibilityLabel="Export sessions as CSV"
+            accessibilityState={{ disabled: !canExport }}
+            hitSlop={8}
+            style={({ pressed }) => [
+              styles.exportButton,
+              !canExport && styles.exportButtonDisabled,
+              pressed && canExport && styles.exportButtonPressed,
+            ]}
+          >
+            <Ionicons
+              name="download-outline"
+              size={18}
+              color={canExport ? Colors.text : Colors.textDim}
+            />
+            <Text
+              style={[styles.exportLabel, !canExport && styles.exportLabelDisabled]}
+            >
+              Export CSV
+            </Text>
+          </Pressable>
+        </View>
         {sessions.length === 0 ? (
           <EmptyState
             title="No holds yet"
@@ -98,13 +141,41 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.pad,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
   heading: {
     color: Colors.text,
     fontSize: 28,
     fontWeight: '700',
-    paddingHorizontal: Layout.pad,
-    paddingTop: 8,
-    paddingBottom: 12,
+  },
+  exportButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: Layout.cornerRadius,
+    backgroundColor: Colors.surface,
+  },
+  exportButtonDisabled: {
+    opacity: 0.5,
+  },
+  exportButtonPressed: {
+    opacity: 0.7,
+  },
+  exportLabel: {
+    color: Colors.text,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  exportLabelDisabled: {
+    color: Colors.textDim,
   },
   list: { padding: Layout.pad, gap: 10 },
   row: {

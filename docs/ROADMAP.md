@@ -26,7 +26,7 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 - [x] Per-session notes
 
 ## v1.2 — Sync & Export
-- [ ] CSV export
+- [x] CSV export
 - [ ] Import / restore from CSV
 - [x] Offline-first service worker for full PWA caching
 
