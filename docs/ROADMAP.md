@@ -33,8 +33,9 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 - [ ] In-app page explanations — short "what is this?" blurbs on each tab, with a slightly longer one for **Box** (what box breathing is, when to use it, the 4-4-4-4 cycle)
 
 ## v1.3 — Beyond
-- [ ] Localization (Spanish, French, Japanese, Chinese)
-- [ ] Optional widgets / shortcuts via web share targets
+- [ ] **PWA app-icon shortcuts** — long-press the installed icon to jump straight into "Start hold," "Box breathing," or "View stats" via the manifest `shortcuts` field
+- [ ] **Web Share Target** — let other apps share files (e.g., a CSV backup) directly into OneBreath; depends on v1.2 import
+- [ ] **PWA Widgets** — small home-screen / dashboard widget showing today's longest hold or current streak (experimental Web API, currently Edge/Windows only)
 
 ## v2.0 — Accounts & Sync (opt-in)
 Adds the first networked features. Strictly opt-in; the app must remain fully usable without an account.
@@ -46,6 +47,13 @@ Adds the first networked features. Strictly opt-in; the app must remain fully us
 - [ ] Social features (friends list, optional leaderboards, shareable session cards)
 - [ ] Privacy controls: per-feature opt-in, hide from leaderboards, anonymous handles
 
+## v3.0 — Reach & Sustainability
+Items that broaden the audience or help fund hosting. All privacy-respecting and opt-in where applicable.
+- [ ] Localization (Spanish, French, Japanese, Chinese)
+- [ ] Privacy-respecting, opt-in product analytics (self-hosted or cookie-less, e.g. Plausible/Umami) — never third-party trackers
+- [ ] Optional, non-tracking sponsorship / ads (e.g. a single static "Supported by …" tile, or unobtrusive banner that can be turned off; never personalized ad networks)
+
 ## Non-goals
-- Ads or third-party analytics
 - Native iOS / Android app store releases (PWA covers all major platforms for free)
+- Third-party tracking analytics (Google Analytics, Meta Pixel, etc.)
+- Personalized / behaviorally-targeted ad networks
