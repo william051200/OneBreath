@@ -29,10 +29,12 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 - [ ] CSV export
 - [ ] Import / restore from CSV
 - [x] Offline-first service worker for full PWA caching
+
+## v1.3 — Help & UX polish
 - [ ] Show app version in the UI (e.g., footer of an About / Settings screen, sourced from `app.json` via `expo-constants`)
 - [ ] In-app page explanations — short "what is this?" blurbs on each tab, with a slightly longer one for **Box** (what box breathing is, when to use it, the 4-4-4-4 cycle)
 
-## v1.3 — Beyond
+## v1.4 — Platform integration
 - [ ] **PWA app-icon shortcuts** — long-press the installed icon to jump straight into "Start hold," "Box breathing," or "View stats" via the manifest `shortcuts` field
 - [ ] **Web Share Target** — let other apps share files (e.g., a CSV backup) directly into OneBreath; depends on v1.2 import
 - [ ] **PWA Widgets** — small home-screen / dashboard widget showing today's longest hold or current streak (experimental Web API, currently Edge/Windows only)
