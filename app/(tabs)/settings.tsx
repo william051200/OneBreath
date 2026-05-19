@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Constants from 'expo-constants';
 import { GradientBackground } from '../../src/components/GradientBackground';
 import { SegmentedControl } from '../../src/components/SegmentedControl';
 import { Colors, Layout } from '../../src/theme/theme';
@@ -14,6 +15,8 @@ const MOTION_OPTIONS: ReadonlyArray<{ value: MotionMode; label: string }> = [
   { value: 'system', label: 'System' },
   { value: 'off', label: 'Off' },
 ];
+
+const APP_VERSION = Constants.expoConfig?.version ?? 'dev';
 
 export default function SettingsScreen() {
   const motion = useMotionPreference();
@@ -41,6 +44,18 @@ export default function SettingsScreen() {
               default and freezes the orb — pick <Text style={styles.helperEm}>On</Text> to keep it
               animating.
             </Text>
+          </Section>
+
+          <Section title="About">
+            <View style={styles.aboutRow}>
+              <Text style={styles.aboutLabel}>Version</Text>
+              <Text
+                style={styles.aboutValue}
+                accessibilityLabel={`App version ${APP_VERSION}`}
+              >
+                {APP_VERSION}
+              </Text>
+            </View>
           </Section>
         </ScrollView>
       </SafeAreaView>
@@ -89,5 +104,26 @@ const styles = StyleSheet.create({
   helperEm: {
     color: Colors.text,
     fontWeight: '600',
+  },
+  aboutRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.surface,
+    borderColor: Colors.surfaceBorder,
+    borderWidth: 1,
+    borderRadius: 14,
+  },
+  aboutLabel: {
+    color: Colors.textDim,
+    fontSize: 13,
+    letterSpacing: 0.3,
+  },
+  aboutValue: {
+    color: Colors.text,
+    fontSize: 14,
+    fontVariant: ['tabular-nums'],
   },
 });
