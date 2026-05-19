@@ -7,6 +7,10 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 - **Box** (`app/(tabs)/box.tsx`) — guided **box breathing** preset: equal-length inhale → hold → exhale → hold cycles (classic 4-4-4-4) used for calming and focus. Pure practice mode; nothing is saved to history.
 - **History** (`app/(tabs)/history.tsx`) — chronological list of past breath-hold sessions from local storage. Supports per-session notes and deletion.
 - **Stats** (`app/(tabs)/stats.tsx`) — animated chart of hold durations over time, with personal-best and trend indicators.
+- **Settings** (`app/(tabs)/settings.tsx`) — preferences. Currently hosts the **Motion** override (On / System / Off); future v1.3 toggles (haptics, sounds, theme) land here.
+
+## Known issues
+- _None currently tracked._ The previous Android-PWA static-orb issue is resolved by the v1.3 **Motion** override (default **On**) which stops trusting `prefers-reduced-motion: reduce` on web by default.
 
 ## v1.0 — Foundation
 - [x] Project scaffold + docs
@@ -35,7 +39,7 @@ Short reference of what each tab does, so future work has a shared vocabulary.
 - [ ] In-app page explanations — short "what is this?" blurbs on each tab, with a slightly longer one for **Box** (what box breathing is, when to use it, the 4-4-4-4 cycle)
 - [ ] **About / Settings screen** consolidating app version, links to Privacy + Roadmap, and the toggles below
 - [ ] **Wipe all data** button (with confirmation) on the Settings screen
-- [ ] Settings toggles: **haptics on/off**, **sounds on/off**, **Reduce Motion override**
+- [ ] Settings toggles: **haptics on/off**, **sounds on/off**, ~~**Reduce Motion override**~~ ✅ (shipped as **Motion: On / System / Off** on the Settings tab; default **On** so the orb keeps animating on Android even when the OS asks for reduced motion)
 - [ ] **Light theme + auto (system) theme** — currently dark only
 - [ ] **Accessibility audit** — screen-reader labels on every interactive element, color-contrast check, focus order on web
 
